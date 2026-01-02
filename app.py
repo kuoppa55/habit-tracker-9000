@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, request, redirect, url_for
 from datetime import date, timedelta
 
 # Initi flask
@@ -121,6 +121,29 @@ def index():
         habits_data.append({**habit, **stats})
 
     return render_template('index.html', habits=habits_data)
+
+@app.route('/add', methods=('GET', 'POST'))
+def add_habit():
+    if request.method == 'POST':
+        name = request.form['name']
+        h_type = request.form['type']
+
+        try:
+            target = float(request.form['target'])
+        except ValueError:
+            target = 1.0
+        
+        unit = request.form.get('unit', '')
+        color = request.form['color']
+
+        db = get_db()
+        db.execute(
+            'INSERT INTO habits (name, type, target, unit, color) VALUES (?, ?, ?, ?, ?)',
+            (name, h_type, target, unit, color)
+        )
+        db.commit()
+        return redirect(url_for('index'))
+    return render_template('add_habit.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

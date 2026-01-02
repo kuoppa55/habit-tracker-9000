@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Habit Tracker 9000</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <h1>Hybrid Chain Tracker</h1>
+        <a href="{{ url_for('add_habit') }}" class="btn" style="margin-bottom: 20px;">+ Add New Habit</a>
 
         {% for habit in habits %}
         <div class="habit-row">

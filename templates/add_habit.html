@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Habit</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class-"container">
+        <h1>Add New Habit</h1>
+
+        <form method="post">
+            <div class="form-group">
+                <label for="name">Habit Name</label>
+                <input type="text" id="name" name="name" placeholder="e.g. Drink Water" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Habit Type</label>
+                <select name="type" id="type" onchange="toggleFields()" required>
+                    <option value="binary">Binary (Done/Not Done)</option>
+                    <option value="progressive">Progressive (Percentage Based)</option>
+                    <option value="vice">Vice (Shield / Avoidance)</option>
+                </select>
+            </div>
+
+            <div id="progressive-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="target">Daily Target</label>
+                    <input type="number" step="any" id="target" name="target" placeholder="e.g. 8 (for 8 glasses of water)">
+                </div>
+                <div class="form-group">
+                    <label for="unit">Unit</label>
+                    <input type="text" name="unit" id="unit" placeholder="e.g. ml, pages, mins">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="color">Theme Color</label>
+                <input type="color" name="color" id="color" value="#4CAF50">
+            </div>
+
+            <button type="submit" class="btn">Create Habit</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+
+    <script>
+        function toggleFields() {
+            const type = document.getElementById('type').value;
+            const progressiveFields = document.getElementById('progressive-fields');
+
+            if (type === 'progressive') {
+                progressiveFields.style.display = 'block';
+                document.getElementById('target').required = true;
+            } else {
+                progressiveFields.style.display = 'none';
+                document.getElementById('target').required = false;
+                if (type === 'binary') document.getElementById('target').value = 1;
+            }
+        }
+        toggleFields();  // Initialize on page load
+    </script>
+</body>
+</html>
