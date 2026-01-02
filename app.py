@@ -73,37 +73,49 @@ def calculate_habit_stats(habit):
     # Convert logs to a dictionary for easy access
     log_dict = {row['date']: row['value'] for row in logs}
 
-    # Calculate current streak
+    # Check today's status first
+    today_str = date.today().strftime('%Y-%m-%d')
+    today_value = log_dict.get(today_str, 0)
+
+    # Determine if today is done -- for vices this will differ later on
+    is_completed = today_value >= habit['target']
+
+    # Calculate historical streak
     streak = 0
-    check_date = date.today()
-
-    # If today is not completed that does not count for breaking the streak
-
-    current_check = date.today() - timedelta(days=1)
+    check_date = date.today() - timedelta(days=1)
 
     while True:
-        d_str = current_check.strftime('%Y-%m-%d')
+        d_str = check_date.strftime('%Y-%m-%d')
         val = log_dict.get(d_str, 0)
 
         if val >= habit['target']:
             streak += 1
-            current_check -= timedelta(days=1)
+            check_date -= timedelta(days=1)
         else:
             break
 
-    # Get today's ring percentage
-    today_str = date.today().strftime('%Y-%m-%d')
-    today_value = log_dict.get(today_str, 0)
+    if is_completed:
+        streak += 1
 
-    fill_percent = min(100, (today_value / habit['target']) * 100)
+    if habit['target'] > 0:
+        fill_percent = min(100, (today_value/ habit['target']) * 100)
+    else:
+        fill_percent = 0 if today_value == 0 else 100
 
-    is_completed = today_value >= habit['target']
+    shield_material = "wood"
+    if streak >= 60:
+        shield_material = "energy"
+    elif streak >= 30:
+        shield_material = "gold"
+    elif streak >= 14:
+        shield_material = "iron"
 
     return {
         'streak': streak,
         'fill_percent': fill_percent,
         'is_completed': is_completed,
-        'today_value': today_value
+        'today_value': today_value,
+        'shield_material': shield_material
     }
 
 @app.cli.command('init-db')

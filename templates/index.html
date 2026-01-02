@@ -37,6 +37,16 @@
                             <input type="number" name="amount" step="any" placeholder="+ Add" required>
                             <button type="submit" class="btn btn-small">+</button>
                         </form>
+
+                    {% elif habit.type == 'vice'%}
+                        {% if habit.is_completed %}
+                            <button class="btn btn-vice-disabled" disabled>Shield Active</button>
+                        {% else %}
+                            <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST">
+                                <input type="hidden" name="amount" value="1">
+                                <button type="submit" class="btn btn-vice">Deflect Vice</button>
+                            </form>
+                        {% endif %}
                     {% endif %}
             
                 </div>
@@ -57,6 +67,19 @@
                                     transform="rotate(-90 50 50)"/>
                         </svg>
                         <span class="streak-num">{{ habit.streak }}</span>
+                    </div>
+                {% elif habit.type == 'vice' %}
+                    <div class="vice-container">
+                        <div class="shield {{ habit.shield_material }} {{ 'active' if habit.is_completed else '' }}">
+                            <svg width="80" height="90" viewBox="0 0 100 120">
+                                <path class="shield-shape" d="M50 115 C20 100 0 70 0 30 L50 0 L100 30 C100 70 80 100 50 115 Z" />
+                                <path class="shield-glint" d="M50 10 C80 30 90 60 50 105 C10 60 20 30 50 10 Z" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            
+                            <span class="shield-streak">{{ habit.streak }}</span>
+                        </div>
+    
+                        <div class="deflection-zone"></div>
                     </div>
                 {% endif %}
 

@@ -156,3 +156,90 @@ input[type="color"] {
     color: #666;
     margin-bottom: 3px;
 }
+
+.vice-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 90px;
+}
+
+.shield {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.shield svg {
+    filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3));
+}
+
+.shield-streak {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+/* --- Materials --- */
+
+/* Wood (Start) */
+.shield.wood .shield-shape {
+    fill: #8D6E63; /* Brown */
+    stroke: #5D4037;
+    stroke-width: 3;
+}
+
+/* Iron (3+ Days) */
+.shield.iron .shield-shape {
+    fill: #78909C; /* Blue Grey */
+    stroke: #37474F;
+    stroke-width: 4;
+}
+
+/* Gold (7+ Days) */
+.shield.gold .shield-shape {
+    fill: #FFD700; /* Gold */
+    stroke: #FF6F00;
+    stroke-width: 4;
+}
+.shield.gold {
+    filter: drop-shadow(0 0 10px #FFD700);
+}
+
+/* Energy (30+ Days) */
+.shield.energy .shield-shape {
+    fill: #2979FF; /* Neon Blue */
+    stroke: #fff;
+    stroke-width: 2;
+}
+.shield.energy {
+    filter: drop-shadow(0 0 15px #2979FF);
+    animation: pulse 2s infinite;
+}
+
+/* --- Active State (Today Checked In) --- */
+.shield.active {
+    transform: scale(1.1); /* Slightly larger to show active protection */
+}
+
+@keyframes pulse {
+    0% { filter: drop-shadow(0 0 10px #2979FF); }
+    50% { filter: drop-shadow(0 0 25px #2979FF); }
+    100% { filter: drop-shadow(0 0 10px #2979FF); }
+}
+
+/* Vice Buttons */
+.btn-vice {
+    background-color: #f44336; /* Red to signify 'fighting' a vice */
+}
+.btn-vice-disabled {
+    background-color: #8D6E63; /* Wood color */
+    color: #eee;
+}
