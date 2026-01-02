@@ -145,5 +145,34 @@ def add_habit():
         return redirect(url_for('index'))
     return render_template('add_habit.html')
 
+@app.route('/log/<int:habit_id>', methods=['POST'])
+def log_progress(habit_id):
+    db = get_db()
+    today = date.today().strftime('%Y-%m-%d')
+
+    try:
+        amount = float(request.form.get('amount'))
+    except (ValueError, TypeError):
+        amount = 1.0
+
+    existing_log = db.execute(
+        'SELECT * FROM daily_logs WHERE habit_id = ? AND date = ?',
+        (habit_id, today)
+    ).fetchone()
+
+    if existing_log:
+        new_value = existing_log['value'] + amount
+        db.execute(
+            'UPDATE daily_logs SET value = ? WHERE id = ?',
+            (new_value, existing_log['id'])
+        )
+    else:
+        db.execute(
+            'INSERT INTO daily_logs (habit_id, date, value) VALUES (?, ?, ?)',
+            (habit_id, today, amount)
+        )
+    db.commit()
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(debug=True)
