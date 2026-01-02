@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Habit Tracker 9000</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Hybrid Chain Tracker</h1>
+
+        {% for habit in habits %}
+        <div class="habit-row">
+            <div class="habit-info">
+                <h2>{{ habit.name}}</h2>
+                <p>Streak: {{ habit.streak}} days</p>
+            </div>
+
+            <div class="chain-container">
+                {% if habit.type == 'binary'%}
+                    <div class="node binary-node {{ 'completed' if habit.is_completed else ''}}">
+                        <span class="streak-num">{{ habit.streak }}</span>
+                    </div>
+                {% elif habit.type == 'progressive' %}
+                    <div class="node progressive-node">
+                        <svg width="60" height="60" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" stroke="#ddd" stroke-width="10" fill="none"/>
+                            <circle cx="50" cy="50" r="45" stroke="{{ habit.color }}" stroke-width="10" fill="none"
+                                    stroke-dasharray="283"
+                                    stroke-dashoffset="{{ 283 - (283 * habit.fill_percent / 100) }}"
+                                    transform="rotate(-90 50 50)"/>
+                        </svg>
+                        <span class="streak-num">{{ habit.streak }}</span>
+                    </div>
+                {% endif %}
+
+                {% if habit.is_completed %}
+                    <div class="link-connector active"></div>
+                {% else %}
+                    <div class="link-connector"></div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

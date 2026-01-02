@@ -1,0 +1,68 @@
+body {font-family: sans-serif; background: #f4f4f4;}
+.container {max-width: 800px; margin: 0 auto; padding: 20px;}
+
+.habit-row {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chain-container {
+    display: flex;
+    align-items: center;
+}
+
+.node {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.binary-node {
+    background: #e0e0e0;
+    color: #888;
+    transition: background 0.3s;
+}
+
+.binary-node.completed {
+    background: #4caf50;
+    color: white;
+}
+
+.progressive-node {
+    position: relative;
+}
+.progressive-node svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.progressive-node .streak-num {
+    z-index: 3;
+}
+
+.link-connector {
+    width: 50px;
+    height: 8px;
+    background: #e0e0e0;
+    margin-left: -5px;
+    margin-right: -5px;
+    z-index: 1;
+    transition: background 0.5s ease-in-out;
+}
+
+.link-connector.active {
+    background: #4caf50;
+}

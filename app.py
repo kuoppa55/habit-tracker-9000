@@ -1,6 +1,7 @@
 import sqlite3
 import os
-from flask import Flask, g
+from flask import Flask, g, render_template
+from datetime import date, timedelta
 
 # Initi flask
 app = Flask(__name__)
@@ -57,13 +58,69 @@ def init_db():
     db.commit()
     print("Habit Tracker 9000: Database initialized.")
 
+
+
+def calculate_habit_stats(habit):
+    # Calculate current streak and today's status for a given habit
+    db = get_db()
+
+    # Fetch all logs for the habit, ordered by date descending
+    logs = db.execute(
+        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
+        (habit['id'],)
+    ).fetchall()
+
+    # Convert logs to a dictionary for easy access
+    log_dict = {row['date']: row['value'] for row in logs}
+
+    # Calculate current streak
+    streak = 0
+    check_date = date.today()
+
+    # If today is not completed that does not count for breaking the streak
+
+    current_check = date.today() - timedelta(days=1)
+
+    while True:
+        d_str = current_check.strftime('%Y-%m-%d')
+        val = log_dict.get(d_str, 0)
+
+        if val >= habit['target']:
+            streak += 1
+            current_check -= timedelta(days=1)
+        else:
+            break
+
+    # Get today's ring percentage
+    today_str = date.today().strftime('%Y-%m-%d')
+    today_value = log_dict.get(today_str, 0)
+
+    fill_percent = min(100, (today_value / habit['target']) * 100)
+
+    is_completed = today_value >= habit['target']
+
+    return {
+        'streak': streak,
+        'fill_percent': fill_percent,
+        'is_completed': is_completed,
+        'today_value': today_value
+    }
+
 @app.cli.command('init-db')
 def init_db_command():
     init_db()
 
 @app.route('/')
 def index():
-    return "Habit Tracker 9000 is running!"
+    db = get_db()
+    habits_query = db.execute('SELECT * FROM habits WHERE type != "vice"').fetchall()
+
+    habits_data = []
+    for habit in habits_query:
+        stats = calculate_habit_stats(habit)
+        habits_data.append({**habit, **stats})
+
+    return render_template('index.html', habits=habits_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
