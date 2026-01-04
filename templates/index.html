@@ -53,44 +53,63 @@
             </div>
 
             <div class="chain-container">
-                {% if habit.type == 'binary'%}
-                    <div class="node binary-node {{ 'completed' if habit.is_completed else ''}}">
-                        <span class="streak-num">{{ habit.streak }}</span>
-                    </div>
-                {% elif habit.type == 'progressive' %}
-                    <div class="node progressive-node">
-                        <svg width="60" height="60" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" stroke="#ddd" stroke-width="10" fill="none"/>
-                            <circle cx="50" cy="50" r="45" stroke="{{ habit.color }}" stroke-width="10" fill="none"
-                                    stroke-dasharray="283"
-                                    stroke-dashoffset="{{ 283 - (283 * habit.fill_percent / 100) }}"
-                                    transform="rotate(-90 50 50)"/>
-                        </svg>
-                        <span class="streak-num">{{ habit.streak }}</span>
-                    </div>
-                {% elif habit.type == 'vice' %}
+
+                {% if habit.type == 'vice' %}
                     <div class="vice-container">
                         <div class="shield {{ habit.shield_material }} {{ 'active' if habit.is_completed else '' }}">
                             <svg width="80" height="90" viewBox="0 0 100 120">
                                 <path class="shield-shape" d="M50 115 C20 100 0 70 0 30 L50 0 L100 30 C100 70 80 100 50 115 Z" />
                                 <path class="shield-glint" d="M50 10 C80 30 90 60 50 105 C10 60 20 30 50 10 Z" fill="rgba(255,255,255,0.2)"/>
                             </svg>
-                            
                             <span class="shield-streak">{{ habit.streak }}</span>
                         </div>
-    
                         <div class="deflection-zone"></div>
                     </div>
-                {% endif %}
-
-                {% if habit.is_completed %}
-                    <div class="link-connector active"></div>
                 {% else %}
-                    <div class="link-connector"></div>
+                    {% for day in habit.history %}
+
+                        {% if not loop.first %}
+                            {% set prev_day = habit.history[loop.index0 - 1] %}
+                            <div class="link-connector
+                                {{ 'active' if (day.completed and prev_day.completed) else '' }}
+                                {{'animate' if (day.is_today and day.completed and prev_day.completed) else '' }}
+                            "></div>
+                        {% endif %}
+
+                        <div class="node-wrapper">
+                            {% if habit.type == 'binary' %}
+                                <div class="node binary-node {{ 'completed' if day.completed else '' }} {{ 'today' if day.is_today else '' }}">
+                                    {% if day.is_today %}
+                                        <span class="streak-num">{{ habit.streak }}</span>
+                                    {% else %}
+                                        {% if day.completed %}✓{% endif %}
+                                    {% endif %}
+                                </div>
+                            {% elif habit.type == 'progressive' %}
+                                <div class="node progressive-node {{ 'today' if day.is_today else '' }}">
+                                    <svg width="50" height="50" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="45" stroke="#eee" stroke-width="10" fill="none"/>
+                                        {% if day.fill_percent >= 100 %}
+                                            <circle cx="50" cy="50" r="40" fill="{{ habit.color }}" fill-opacity="0.3" />
+                                        {% endif %}
+                                        <circle cx="50" cy="50" r="45" stroke="{{ habit.color }}" stroke-width="10" fill="none"
+                                                stroke-dasharray="283" 
+                                                stroke-dashoffset="{{ 283 - (283 * day.fill_percent / 100) }}"
+                                                transform="rotate(-90 50 50)" />
+                                    </svg>
+                                    {% if day.is_today %}
+                                        <span class="streak-num">{{ habit.streak }}</span>
+                                    {% elif day.fill_percent >= 100 %}
+                                        <span class="checkmark" style="color: #fff">✓</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="day-label">{{ day.date }}</div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </div>
-        </div>
-        {% endfor %}
+        </div> {% endfor %}
     </div>
 </body>
 </html>

@@ -14,20 +14,43 @@ body {font-family: sans-serif; background: #f4f4f4;}
 
 .chain-container {
     display: flex;
+    /* Align items to the top so we can calculate the exact center of the node */
+    align-items: flex-start;
+}
+
+.node-wrapper {
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .node {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    display: flex;
+    margin: 0;
+    
+    /* This creates the perfect center for text/checkmarks */
+    display: flex; 
     justify-content: center;
     align-items: center;
+    
+    font-size: 1rem;
     font-weight: bold;
-    font-size: 1.2rem;
-    position: relative;
-    z-index: 2;
+    border: 2px solid transparent;
+}
+
+.node.today {
+    border-color: #333; /* Highlight Today */
+    transform: scale(1.1);
+}
+
+.day-label {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 5px;
 }
 
 .binary-node {
@@ -42,29 +65,59 @@ body {font-family: sans-serif; background: #f4f4f4;}
 }
 
 .progressive-node {
-    position: relative;
+    background: transparent; 
+    position: relative; /* Essential for centering the text over the ring */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
 }
 .progressive-node svg {
     position: absolute;
     top: 0;
     left: 0;
+    width: 50px;
+    height: 50px;
+    z-index: 0; /* Sit behind */
 }
 .progressive-node .streak-num {
-    z-index: 3;
+    position: relative;
+    z-index: 10; /* Sit on top */
+    line-height: 1; /* Fix vertical alignment issues */
+}
+
+.progressive-node .checkmark {
+    position: relative;
+    z-index: 10; /* Sit on top of the SVG */
+    font-weight: bold;
 }
 
 .link-connector {
-    width: 50px;
-    height: 8px;
+    width: 30px; 
+    height: 6px;
     background: #e0e0e0;
-    margin-left: -5px;
-    margin-right: -5px;
+    margin: 0 -2px; 
     z-index: 1;
-    transition: background 0.5s ease-in-out;
+    transform-origin: left;
+    
+    /* MAGIC NUMBER: 22px 
+       Node Height (50px) / 2 = 25px
+       Connector Height (6px) / 2 = 3px
+       25px - 3px = 22px (Push down from top to hit center)
+    */
+    margin-top: 22px;
 }
 
 .link-connector.active {
     background: #4caf50;
+}
+
+.link-connector.animate {
+    animation: drawLink 0.6s ease-out forwards;
+}
+
+@keyframes drawLink {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
 }
 
 .form-group {

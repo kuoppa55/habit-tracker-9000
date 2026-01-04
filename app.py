@@ -118,6 +118,38 @@ def calculate_habit_stats(habit):
         'shield_material': shield_material
     }
 
+def get_habit_history(habit_id, target):
+    db = get_db()
+    history = []
+
+    today = date.today()
+    for i in range(4, -1, -1):
+        d = today - timedelta(days=i)
+        d_str = d.strftime('%Y-%m-%d')
+
+        row = db.execute(
+            'SELECT value FROM daily_logs WHERE habit_id = ? AND date = ?',
+            (habit_id, d_str)
+        ).fetchone()
+
+        val = row['value'] if row else 0
+        completed = val >= target
+
+        if target > 0:
+            fill_percent = min(100, (val / target) * 100)
+        else:
+            fill_percent = 100 if val > 0 else 0
+
+        history.append({
+            'date': d.strftime('%a'),
+            'full_date': d_str,
+            'completed': completed,
+            'is_today': (d == today),
+            'fill_percent': fill_percent,
+        })
+
+    return history
+
 @app.cli.command('init-db')
 def init_db_command():
     init_db()
@@ -125,12 +157,14 @@ def init_db_command():
 @app.route('/')
 def index():
     db = get_db()
-    habits_query = db.execute('SELECT * FROM habits WHERE type != "vice"').fetchall()
+    habits_query = db.execute('SELECT * FROM habits').fetchall()
 
     habits_data = []
     for habit in habits_query:
         stats = calculate_habit_stats(habit)
-        habits_data.append({**habit, **stats})
+
+        history = get_habit_history(habit['id'], habit['target'])
+        habits_data.append({**habit, **stats, 'history': history})
 
     return render_template('index.html', habits=habits_data)
 
