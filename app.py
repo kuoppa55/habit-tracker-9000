@@ -1,7 +1,7 @@
 import sqlite3
 import os
 from flask import Flask, g, render_template, request, redirect, url_for
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 # Initi flask
 app = Flask(__name__)
@@ -60,7 +60,10 @@ def init_db():
 
 
 
-def calculate_habit_stats(habit):
+def calculate_habit_stats(habit, ref_date=None):
+    if ref_date is None:
+        ref_date = date.today()
+
     # Calculate current streak and today's status for a given habit
     db = get_db()
 
@@ -74,15 +77,15 @@ def calculate_habit_stats(habit):
     log_dict = {row['date']: row['value'] for row in logs}
 
     # Check today's status first
-    today_str = date.today().strftime('%Y-%m-%d')
-    today_value = log_dict.get(today_str, 0)
+    current_str = ref_date.strftime('%Y-%m-%d')
+    current_value = log_dict.get(current_str, 0)
 
     # Determine if today is done -- for vices this will differ later on
-    is_completed = today_value >= habit['target']
+    is_completed = current_value >= habit['target']
 
     # Calculate historical streak
     streak = 0
-    check_date = date.today() - timedelta(days=1)
+    check_date = ref_date - timedelta(days=1)
 
     while True:
         d_str = check_date.strftime('%Y-%m-%d')
@@ -98,9 +101,9 @@ def calculate_habit_stats(habit):
         streak += 1
 
     if habit['target'] > 0:
-        fill_percent = min(100, (today_value/ habit['target']) * 100)
+        fill_percent = min(100, (current_value/ habit['target']) * 100)
     else:
-        fill_percent = 0 if today_value == 0 else 100
+        fill_percent = 0 if current_value == 0 else 100
 
     shield_material = "wood"
     if streak >= 60:
@@ -114,17 +117,18 @@ def calculate_habit_stats(habit):
         'streak': streak,
         'fill_percent': fill_percent,
         'is_completed': is_completed,
-        'today_value': today_value,
+        'today_value': current_value,
         'shield_material': shield_material
     }
 
-def get_habit_history(habit_id, target):
+def get_habit_history(habit_id, target, ref_date=None):
+    if ref_date is None:
+        ref_date = date.today()
     db = get_db()
     history = []
 
-    today = date.today()
     for i in range(4, -1, -1):
-        d = today - timedelta(days=i)
+        d = ref_date - timedelta(days=i)
         d_str = d.strftime('%Y-%m-%d')
 
         row = db.execute(
@@ -144,7 +148,7 @@ def get_habit_history(habit_id, target):
             'date': d.strftime('%a'),
             'full_date': d_str,
             'completed': completed,
-            'is_today': (d == today),
+            'is_today': (d == ref_date),
             'fill_percent': fill_percent,
         })
 
@@ -157,16 +161,24 @@ def init_db_command():
 @app.route('/')
 def index():
     db = get_db()
+
+    date_str = request.args.get('date')
+    if date_str:
+        try:
+            view_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            view_date = date.today()
+    else:
+        view_date = date.today()
     habits_query = db.execute('SELECT * FROM habits').fetchall()
 
     habits_data = []
     for habit in habits_query:
-        stats = calculate_habit_stats(habit)
-
-        history = get_habit_history(habit['id'], habit['target'])
+        stats = calculate_habit_stats(habit, ref_date=view_date)
+        history = get_habit_history(habit['id'], habit['target'], ref_date=view_date)
         habits_data.append({**habit, **stats, 'history': history})
 
-    return render_template('index.html', habits=habits_data)
+    return render_template('index.html', habits=habits_data, current_view_date=view_date)
 
 @app.route('/add', methods=('GET', 'POST'))
 def add_habit():
@@ -194,7 +206,10 @@ def add_habit():
 @app.route('/log/<int:habit_id>', methods=['POST'])
 def log_progress(habit_id):
     db = get_db()
-    today = date.today().strftime('%Y-%m-%d')
+    
+    log_date_str = request.form.get('date')
+    if not log_date_str:
+        log_date_str = date.today().strftime('%Y-%m-%d')
 
     try:
         amount = float(request.form.get('amount'))
@@ -203,7 +218,7 @@ def log_progress(habit_id):
 
     existing_log = db.execute(
         'SELECT * FROM daily_logs WHERE habit_id = ? AND date = ?',
-        (habit_id, today)
+        (habit_id, log_date_str)
     ).fetchone()
 
     if existing_log:
@@ -215,10 +230,10 @@ def log_progress(habit_id):
     else:
         db.execute(
             'INSERT INTO daily_logs (habit_id, date, value) VALUES (?, ?, ?)',
-            (habit_id, today, amount)
+            (habit_id, log_date_str, amount)
         )
     db.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('index', date=log_date_str))
 
 if __name__ == '__main__':
     app.run(debug=True)

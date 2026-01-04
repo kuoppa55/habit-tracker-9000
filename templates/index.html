@@ -8,6 +8,14 @@
 <body>
     <div class="container">
         <h1>Hybrid Chain Tracker</h1>
+
+        <form action="{{ url_for('index')}}" method="GET" style="margin-bottom: 20px;">
+            <label for="date-picker">Viewing Date:</label>
+            <input type="date" id="date-picker" name="date" 
+               value="{{ current_view_date }}" 
+               onchange="this.form.submit()">
+        </form>
+
         <a href="{{ url_for('add_habit') }}" class="btn" style="margin-bottom: 20px;">+ Add New Habit</a>
 
         {% for habit in habits %}
@@ -23,6 +31,7 @@
                             <button class="btn btn-disabled" disabled>Completed!</button>
                         {% else %}
                             <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST">
+                                <input type="hidden" name="date" value="{{ current_view_date }}">
                                 <input type="hidden" name="amount" value="{{ habit.target }}">
                                 <button type="submit" class="btn btn-checkin">Check In</button>
                             </form>
@@ -34,6 +43,7 @@
                         </div>
                         
                         <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="prog-form">
+                            <input type="hidden" name="date" value="{{ current_view_date }}">
                             <input type="number" name="amount" step="any" placeholder="+ Add" required>
                             <button type="submit" class="btn btn-small">+</button>
                         </form>
@@ -43,6 +53,7 @@
                             <button class="btn btn-vice-disabled" disabled>Shield Active</button>
                         {% else %}
                             <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST">
+                                <input type="hidden" name="date" value="{{ current_view_date }}">
                                 <input type="hidden" name="amount" value="1">
                                 <button type="submit" class="btn btn-vice">Deflect Vice</button>
                             </form>
@@ -73,7 +84,9 @@
                             <div class="link-connector
                                 {{ 'active' if (day.completed and prev_day.completed) else '' }}
                                 {{'animate' if (day.is_today and day.completed and prev_day.completed) else '' }}
-                            "></div>
+                                "
+                                style="{% if day.completed and prev_day.completed %}background-color: {{ habit.color }};{% endif %}"
+                            ></div>
                         {% endif %}
 
                         <div class="node-wrapper">
@@ -111,5 +124,15 @@
             </div>
         </div> {% endfor %}
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(event) {
+            var scrollPos = localStorage.getItem('scrollpos');
+            if (scrollPos) window.scrollTo(0, scrollPos);
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+    </script>
 </body>
 </html>
