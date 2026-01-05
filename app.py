@@ -232,8 +232,16 @@ def log_progress(habit_id):
             'INSERT INTO daily_logs (habit_id, date, value) VALUES (?, ?, ?)',
             (habit_id, log_date_str, amount)
         )
+
+    habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+    event_type = None
+    if habit['type'] == 'vice':
+        event_type = 'deflected'
+    elif new_value >= habit['target']:
+        event_type = 'completed'
+    
     db.commit()
-    return redirect(url_for('index', date=log_date_str))
+    return redirect(url_for('index', date=log_date_str, event=event_type, event_id=habit_id))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

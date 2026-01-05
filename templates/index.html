@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Habit Tracker 9000</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -19,7 +20,7 @@
         <a href="{{ url_for('add_habit') }}" class="btn" style="margin-bottom: 20px;">+ Add New Habit</a>
 
         {% for habit in habits %}
-        <div class="habit-row">
+        <div class="habit-row" id="habit-{{ habit.id }}">
             <div class="habit-info">
                 <h2>{{ habit.name}}</h2>
                 <p>Streak: {{ habit.streak}} days</p>
@@ -133,6 +134,29 @@
         window.onbeforeunload = function(e) {
             localStorage.setItem('scrollpos', window.scrollY);
         };
+    </script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventType = urlParams.get('event');
+        const eventId = urlParams.get('event_id');
+
+        if (eventType == 'completed') {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: {y: 0.6},
+                colors: ['#4CAF50', '#FFD700', '#2196F3']
+            });
+        } else if (eventType == 'deflected') {
+            const shield = document.querySelector(`#habit-${eventId} .shield`);
+            if (shield) {
+                shield.classList.add('deflecting');
+            }
+        }
+
+        if (eventType) {
+            window.history.replaceState({}, document.title, window.location.pathname + "?date=" + (urlParams.get('date') || ""));
+        }
     </script>
 </body>
 </html>
