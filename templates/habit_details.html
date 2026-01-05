@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ habit.name }} Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ habit.name }} Details</h1>
+        <a href="{{ url_for('index') }}" class="btn">← Back</a>
+
+        <div class="stats-grid">
+        </div>
+
+        <table>
+            <thead>
+                <tr><th>Date</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.value }} {% if habit.type == 'progressive' %}{{ habit.unit }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

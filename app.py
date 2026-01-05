@@ -244,5 +244,17 @@ def log_progress(habit_id):
     db.commit()
     return redirect(url_for('index', date=log_date_str, event=event_type, event_id=habit_id))
 
+@app.route('/habit/<int:habit_id>')
+def habit_details(habit_id):
+    db = get_db()
+    habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+
+    logs = db.execute(
+        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
+        (habit_id,)
+    ).fetchall()
+
+    return render_template('habit_details.html', habit=habit, logs=logs)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
