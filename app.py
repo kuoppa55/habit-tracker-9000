@@ -236,4 +236,4 @@ def log_progress(habit_id):
     return redirect(url_for('index', date=log_date_str))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
