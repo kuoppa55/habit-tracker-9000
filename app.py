@@ -228,6 +228,7 @@ def log_progress(habit_id):
             (new_value, existing_log['id'])
         )
     else:
+        new_value = amount
         db.execute(
             'INSERT INTO daily_logs (habit_id, date, value) VALUES (?, ?, ?)',
             (habit_id, log_date_str, amount)
