@@ -49,6 +49,12 @@
                             <button type="submit" class="btn btn-small">+</button>
                         </form>
 
+                        <div class="timer-controls" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                            <span id="timer-display-{{ habit.id }}" style="font-family: monospace; font-size: 1.1rem; min-width: 50px;">00:00</span>
+                            <button type="button" class="btn btn-small" style="background:#2196F3;" onclick="toggleTimer({{ habit.id }})">▶</button>
+                            <button type="button" class="btn btn-small" style="background:#4CAF50;" onclick="saveTimer({{ habit.id }})">💾</button>
+                        </div>
+
                     {% elif habit.type == 'vice'%}
                         {% if habit.is_completed %}
                             <button class="btn btn-vice-disabled" disabled>Shield Active</button>
@@ -156,6 +162,59 @@
 
         if (eventType) {
             window.history.replaceState({}, document.title, window.location.pathname + "?date=" + (urlParams.get('date') || ""));
+        }
+
+        let timers = {};
+
+        function toggleTimer(id) {
+            const display = document.getElementById(`timer-display-${id}`);
+
+            if (timers[id]) {
+                clearInterval(timers[id].interval);
+                delete timers[id];
+                display.style.color = '#999';
+            } else {
+                let startTime = Date.now();
+
+                let currentText = display.innerText.split(':');
+                let currentSeconds = (parseInt(currentText[0]) * 60) + parseInt(currentText[1]);
+                if (currentSeconds > 0) {
+                    startTime = startTime - (currentSeconds * 1000);
+                }
+
+                display.style.color = '#000';
+
+                timers[id] = {
+                    interval: setInterval(() => {
+                        let elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        let mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                        let secs = (elapsed % 60).toString().padStart(2, '0');
+                        display.innerText = `${mins}:${secs}`;
+                    }, 1000)
+                };
+            }
+        }
+
+        function saveTimer(id) {
+            const display = document.getElementById(`timer-display-${id}`).innerText;
+            const parts = display.split(':');
+            const minutes = parseInt(parts[0]) + (parseInt(parts[1]) / 60);
+
+            if (minutes <= 0) return; // Don't save 0
+
+            // 2. Stop the timer
+            if (timers[id]) {
+                clearInterval(timers[id].interval);
+                delete timers[id];
+            }
+
+            // 3. Fill the manual form and submit
+            const inputField = document.getElementById(`input-${id}`);
+            const form = document.getElementById(`form-${id}`);
+            
+            // Use toFixed(2) to keep it clean (e.g. 1.5 minutes)
+            inputField.value = minutes.toFixed(2);
+            form.submit();
         }
     </script>
 </body>
