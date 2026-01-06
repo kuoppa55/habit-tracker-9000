@@ -20,15 +20,41 @@
                 <button class="tab-btn" onclick="switchView('year')">This Year</button>
             </div>
 
-            <div class="scoreboard" style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 15px;">
-                <h2 id="total-display" style="margin: 0; font-size: 2.5rem; color: {{ habit.color }}">0</h2>
-                <span style="color: #666; font-weight: bold;">
-                    {% if habit.type == 'progressive' %}
-                        {{ habit.unit }}
-                    {% else %}
-                        Days Completed
-                    {% endif %}
-                </span>
+            <div class="stats-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                
+                <div class="scoreboard">
+                    <h2 id="total-display" style="margin: 0; font-size: 2.5rem; color: {{ habit.color }}">0</h2>
+                    <span id="unit-display" style="color: #666; font-weight: bold;">
+                        {% if habit.type == 'progressive' %}
+                            {{ habit.unit }}
+                        {% else %}
+                            Days Completed
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div id="medal-container" class="medal-wrapper" style="position: relative; width: 64px; height: 64px; transition: all 0.5s ease;">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="28" stroke="#eee" stroke-width="5" fill="none" />
+                        
+                        <circle id="medal-ring" cx="32" cy="32" r="28" stroke="{{ habit.color }}" stroke-width="5" fill="none" 
+                                stroke-dasharray="176" 
+                                stroke-dashoffset="176" 
+                                stroke-linecap="round"
+                                transform="rotate(-90 32 32)"
+                                style="transition: stroke-dashoffset 0.6s ease-out;" />
+                        
+                        <path id="medal-star" d="M32 10 L38 28 H58 L42 40 L48 58 L32 48 L16 58 L22 40 L6 28 H26 Z" 
+                              fill="{{ habit.color }}" 
+                              transform="translate(0, -2)" 
+                              style="transition: opacity 0.3s; opacity: 0;" />
+                        
+                        <text id="medal-text" x="32" y="38" text-anchor="middle" 
+                              style="font-family: sans-serif; font-weight: bold; font-size: 14px; fill: #999; transition: opacity 0.3s;">
+                            0%
+                        </text>
+                    </svg>
+                </div>
             </div>
 
             <div style="height: 300px; position: relative;">

@@ -267,6 +267,7 @@ def habit_details(habit_id):
     week_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     week_values = []
     week_total = 0
+    week_completed = 0
 
     for i in range(7):
         day = start_week + timedelta(days=i)
@@ -280,6 +281,9 @@ def habit_details(habit_id):
         else:
             week_total += val
 
+        if val >= target:
+            week_completed += 1
+
     # MONTH VIEW
 
     start_month = today.replace(day=1)
@@ -289,6 +293,7 @@ def habit_details(habit_id):
     month_labels = [str(i) for i in range(1, days_in_month + 1)]
     month_values = []
     month_total = 0
+    month_completed = 0
 
     for i in range(1, days_in_month + 1):
         day = today.replace(day=i)
@@ -302,11 +307,15 @@ def habit_details(habit_id):
         else:
             month_total += val
 
+        if val >= target:
+            month_completed += 1
+
     # YEAR VIEW
 
     year_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     year_values = []
     year_total = 0
+    year_completed = 0
 
     current_year = today.year
 
@@ -323,25 +332,36 @@ def habit_details(habit_id):
                     monthly_sum += 1
             else:
                 monthly_sum += val
+
+            if val >= target:
+                year_completed += 1
         
         year_values.append(monthly_sum)
         year_total += monthly_sum
+
+    total_days_year = 366 if calendar.isleap(current_year) else 365
 
     chart_data = {
         'week': {
             'labels': week_labels,
             'values': week_values,
-            'total': week_total
+            'total': week_total,
+            'completed': week_completed,
+            'possible': 7,
         },
         'month': {
             'labels': month_labels,
             'values': month_values,
-            'total': month_total
+            'total': month_total,
+            'completed': month_completed,
+            'possible': days_in_month,
         },
         'year': {
             'labels': year_labels,
             'values': year_values,
-            'total': year_total
+            'total': year_total,
+            'completed': year_completed,
+            'possible': total_days_year,
         }
     }
 

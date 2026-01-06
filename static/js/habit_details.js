@@ -23,6 +23,44 @@ function switchView(view) {
     if (total % 1 !== 0) total = total.toFixed(1); // Decimals for progressive
     document.getElementById('total-display').innerText = total;
 
+    const ring = document.getElementById('medal-ring');
+    const star = document.getElementById('medal-star');
+    const text = document.getElementById('medal-text');
+    const container = document.getElementById('medal-container');
+    
+    const completed = viewData.completed;
+    const possible = viewData.possible;
+
+    let percent = (possible > 0) ? (completed / possible) : 0;
+    if (percent > 1) percent = 1;
+
+    const circumference = 176;
+    const offset = circumference - (circumference * percent);
+    ring.style.strokeDashoffset = offset;
+
+    if (percent === 1 && possible > 0) {
+        // Unlock the Star
+        star.style.opacity = '1';
+        star.style.filter = 'drop-shadow(0 0 2px ' + color + ')';
+
+        text.style.opacity = '0'; // Hide percentage
+        
+        // Glow the Container
+        container.style.transform = 'scale(1.1)';
+        container.style.filter = 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.4))';
+
+    } else {
+        // Locked State (Show progress only)
+        star.style.opacity = '0'; // Dim the star
+        star.style.filter = 'none';
+
+        text.style.opacity = '1'; // Show percentage
+        text.textContent = Math.round(percent * 100) + "%";
+        
+        container.style.transform = 'scale(1)';
+        container.style.filter = 'none';
+    }
+
     let chartType = 'bar';
     let fillSetting = false;
     let tensionSetting = 0;
