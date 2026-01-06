@@ -1,6 +1,7 @@
 import json
 import sqlite3
 import os
+import calendar
 from flask import Flask, g, render_template, request, redirect, url_for
 from datetime import date, timedelta, datetime
 
@@ -250,23 +251,101 @@ def habit_details(habit_id):
     db = get_db()
     habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
 
-    logs_asc = db.execute(
-        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date ASC',
+    all_logs = db.execute(
+        'SELECT date, value FROM daily_logs WHERE habit_id = ?',
         (habit_id,)
     ).fetchall()
 
-    dates = [row['date'] for row in logs_asc]
-    values = [row['value'] for row in logs_asc]
+    log_map = {row['date']: row['value'] for row in all_logs}
 
-    chart_dates = json.dumps(dates)
-    chart_values = json.dumps(values)
+    today = date.today()
+    target = habit['target']
+    is_binary = habit['type'] in ['binary', 'vice']
 
-    logs_desc = db.execute(
-        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
-        (habit_id,)
-    ).fetchall()
+    # WEEK VIEW
+    start_week = today - timedelta(days=today.weekday())
+    week_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    week_values = []
+    week_total = 0
 
-    return render_template('habit_details.html', habit=habit, logs=logs_desc, chart_dates=chart_dates, chart_values=chart_values)
+    for i in range(7):
+        day = start_week + timedelta(days=i)
+        val = log_map.get(day.strftime('%Y-%m-%d'), 0)
+
+        graph_val = 1 if (is_binary and val >= target) else (val if not is_binary else 0)
+        week_values.append(graph_val)
+
+        if is_binary:
+            if val >= target: week_total += 1
+        else:
+            week_total += val
+
+    # MONTH VIEW
+
+    start_month = today.replace(day=1)
+
+    _, days_in_month = calendar.monthrange(today.year, today.month)
+
+    month_labels = [str(i) for i in range(1, days_in_month + 1)]
+    month_values = []
+    month_total = 0
+
+    for i in range(1, days_in_month + 1):
+        day = today.replace(day=i)
+        val = log_map.get(day.strftime('%Y-%m-%d'), 0)
+        
+        graph_val = 1 if (is_binary and val >= target) else (val if not is_binary else 0)
+        month_values.append(graph_val)
+        
+        if is_binary:
+            if val >= target: month_total += 1
+        else:
+            month_total += val
+
+    # YEAR VIEW
+
+    year_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    year_values = []
+    year_total = 0
+
+    current_year = today.year
+
+    for month_idx in range(1, 13):
+        monthly_sum = 0
+        _, d_in_m = calendar.monthrange(current_year, month_idx)
+
+        for d in range(1, d_in_m + 1):
+            day_str = f"{current_year}-{month_idx:02d}-{d:02d}"
+            val = log_map.get(day_str, 0)
+
+            if is_binary:
+                if val >= target:
+                    monthly_sum += 1
+            else:
+                monthly_sum += val
+        
+        year_values.append(monthly_sum)
+        year_total += monthly_sum
+
+    chart_data = {
+        'week': {
+            'labels': week_labels,
+            'values': week_values,
+            'total': week_total
+        },
+        'month': {
+            'labels': month_labels,
+            'values': month_values,
+            'total': month_total
+        },
+        'year': {
+            'labels': year_labels,
+            'values': year_values,
+            'total': year_total
+        }
+    }
+
+    return render_template('habit_details.html', habit=habit, chart_data=json.dumps(chart_data))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
