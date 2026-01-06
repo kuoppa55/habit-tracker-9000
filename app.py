@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import os
 from flask import Flask, g, render_template, request, redirect, url_for
@@ -249,12 +250,23 @@ def habit_details(habit_id):
     db = get_db()
     habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
 
-    logs = db.execute(
+    logs_asc = db.execute(
+        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date ASC',
+        (habit_id,)
+    ).fetchall()
+
+    dates = [row['date'] for row in logs_asc]
+    values = [row['value'] for row in logs_asc]
+
+    chart_dates = json.dumps(dates)
+    chart_values = json.dumps(values)
+
+    logs_desc = db.execute(
         'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
         (habit_id,)
     ).fetchall()
 
-    return render_template('habit_details.html', habit=habit, logs=logs)
+    return render_template('habit_details.html', habit=habit, logs=logs_desc, chart_dates=chart_dates, chart_values=chart_values)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

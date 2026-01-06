@@ -307,3 +307,14 @@ input[type="color"] {
 .shield.deflecting {
     animation: deflection 0.4s ease-out;
 }
+
+.habit-link {
+    text-decoration: none;
+    color: inherit; /* Inherits the black h2 color */
+    transition: color 0.2s;
+}
+
+.habit-link:hover {
+    color: #2196F3; /* Light blue on hover to indicate clickability */
+    text-decoration: underline;
+}

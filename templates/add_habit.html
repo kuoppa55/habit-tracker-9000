@@ -45,21 +45,6 @@
         </form>
     </div>
 
-    <script>
-        function toggleFields() {
-            const type = document.getElementById('type').value;
-            const progressiveFields = document.getElementById('progressive-fields');
-
-            if (type === 'progressive') {
-                progressiveFields.style.display = 'block';
-                document.getElementById('target').required = true;
-            } else {
-                progressiveFields.style.display = 'none';
-                document.getElementById('target').required = false;
-                if (type === 'binary') document.getElementById('target').value = 1;
-            }
-        }
-        toggleFields();  // Initialize on page load
-    </script>
+    <script src="{{ url_for('static', filename='js/add_habit.js') }}"></script>
 </body>
 </html>

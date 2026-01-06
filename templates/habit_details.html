@@ -1,18 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
 <head>
     <meta charset="UTF-8">
     <title>{{ habit.name }} Details</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>{{ habit.name }} Details</h1>
-        <a href="{{ url_for('index') }}" class="btn">← Back</a>
-
-        <div class="stats-grid">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>{{ habit.name }}</h1>
+            <a href="{{ url_for('index') }}" class="btn">← Back</a>
         </div>
 
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 300px;">
+            <canvas id="progressChart"
+                data-dates='{{ chart_dates | safe}}'
+                data-values='{{ chart_values | safe}}'
+                data-type='{{ habit.type }}'
+                data-color='{{ habit.color }}'
+                data-target='{{ habit.target }}'>
+            </canvas>
+        </div>
+
+        <h3>History</h3>
         <table>
             <thead>
                 <tr><th>Date</th><th>Value</th></tr>
@@ -27,5 +38,7 @@
             </tbody>
         </table>
     </div>
+
+    <script src="{{ url_for('static', filename='js/habit_details.js') }}"></script>
 </body>
 </html>
