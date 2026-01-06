@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const color = ctx.dataset.color;
     const target = parseFloat(ctx.dataset.target);
 
-    new CharacterData(ctx.getContext('2d'), {
+    new Chart(ctx.getContext('2d'), {
         type: habitType === 'progressive' ? 'bar' : 'line',
         data: {
             labels: dates,
