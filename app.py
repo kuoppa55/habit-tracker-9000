@@ -2,7 +2,7 @@ import json
 import sqlite3
 import os
 import calendar
-from flask import Flask, g, render_template, request, redirect, url_for
+from flask import Flask, g, render_template, request, redirect, url_for, jsonify
 from datetime import date, timedelta, datetime
 
 # Initi flask
@@ -236,14 +236,33 @@ def log_progress(habit_id):
             (habit_id, log_date_str, amount)
         )
 
+    db.commit()
+
     habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
     event_type = None
     if habit['type'] == 'vice':
         event_type = 'deflected'
     elif new_value >= habit['target']:
         event_type = 'completed'
-    
-    db.commit()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            view_date = datetime.strptime(log_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            view_date = date.today()
+        
+        stats = calculate_habit_stats(habit, ref_date=view_date)
+
+        return jsonify({
+            'success': True,
+            'habit_id': habit_id,
+            'new_streak': stats['streak'],
+            'new_value': new_value,
+            'is_completed': stats['is_completed'],
+            'fill_percent': stats['fill_percent'],
+            'event': event_type
+        })
+
     return redirect(url_for('index', date=log_date_str, event=event_type, event_id=habit_id))
 
 @app.route('/habit/<int:habit_id>')
