@@ -71,19 +71,22 @@ def calculate_habit_stats(habit, ref_date=None):
 
     # Fetch all logs for the habit, ordered by date descending
     logs = db.execute(
-        'SELECT date, value FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
+        'SELECT date, value, historical_target FROM daily_logs WHERE habit_id = ? ORDER BY date DESC',
         (habit['id'],)
     ).fetchall()
 
     # Convert logs to a dictionary for easy access
-    log_dict = {row['date']: row['value'] for row in logs}
+    log_dict = {row['date']: row for row in logs}
 
     # Check today's status first
     current_str = ref_date.strftime('%Y-%m-%d')
-    current_value = log_dict.get(current_str, 0)
+    today_log = log_dict.get(current_str)
+    current_value = today_log['value'] if today_log else 0
+
+    today_target = today_log['historical_target'] if (today_log and today_log['historical_target']) else habit['target']
 
     # Determine if today is done -- for vices this will differ later on
-    is_completed = current_value >= habit['target']
+    is_completed = current_value >= today_target
 
     # Calculate historical streak
     streak = 0
@@ -91,9 +94,14 @@ def calculate_habit_stats(habit, ref_date=None):
 
     while True:
         d_str = check_date.strftime('%Y-%m-%d')
-        val = log_dict.get(d_str, 0)
+        row = log_dict.get(d_str)
 
-        if val >= habit['target']:
+        if not row:
+            break
+
+        effective_target = row['historical_target'] if row['historical_target'] else habit['target']
+
+        if row['value'] >= effective_target:
             streak += 1
             check_date -= timedelta(days=1)
         else:
@@ -102,8 +110,8 @@ def calculate_habit_stats(habit, ref_date=None):
     if is_completed:
         streak += 1
 
-    if habit['target'] > 0:
-        fill_percent = min(100, (current_value/ habit['target']) * 100)
+    if today_target > 0:
+        fill_percent = min(100, (current_value / today_target) * 100)
     else:
         fill_percent = 0 if current_value == 0 else 100
 
@@ -123,7 +131,7 @@ def calculate_habit_stats(habit, ref_date=None):
         'shield_material': shield_material
     }
 
-def get_habit_history(habit_id, target, ref_date=None):
+def get_habit_history(habit_id, current_target, ref_date=None):
     if ref_date is None:
         ref_date = date.today()
     db = get_db()
@@ -134,15 +142,18 @@ def get_habit_history(habit_id, target, ref_date=None):
         d_str = d.strftime('%Y-%m-%d')
 
         row = db.execute(
-            'SELECT value FROM daily_logs WHERE habit_id = ? AND date = ?',
+            'SELECT value, historical_target FROM daily_logs WHERE habit_id = ? AND date = ?',
             (habit_id, d_str)
         ).fetchone()
 
         val = row['value'] if row else 0
-        completed = val >= target
+        
+        effective_target = row['historical_target'] if (row and row['historical_target']) else current_target
 
-        if target > 0:
-            fill_percent = min(100, (val / target) * 100)
+        completed = val >= effective_target
+
+        if effective_target > 0:
+            fill_percent = min(100, (val / effective_target) * 100)
         else:
             fill_percent = 100 if val > 0 else 0
 
@@ -209,6 +220,7 @@ def add_habit():
 def log_progress(habit_id):
     db = get_db()
     
+    # 1. Get Date and Amount
     log_date_str = request.form.get('date')
     if not log_date_str:
         log_date_str = date.today().strftime('%Y-%m-%d')
@@ -218,31 +230,40 @@ def log_progress(habit_id):
     except (ValueError, TypeError):
         amount = 1.0
 
+    # 2. Get the Current Habit Target (Needed for the snapshot)
+    habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+    current_target = habit['target']
+
+    # 3. Check for existing log
     existing_log = db.execute(
         'SELECT * FROM daily_logs WHERE habit_id = ? AND date = ?',
         (habit_id, log_date_str)
     ).fetchone()
 
+    # 4. Perform ONE Update or Insert
     if existing_log:
         new_value = existing_log['value'] + amount
+        # Update both value AND historical_target
+        # This ensures that if you edit the habit target today, today's log updates to match.
         db.execute(
-            'UPDATE daily_logs SET value = ? WHERE id = ?',
-            (new_value, existing_log['id'])
+            'UPDATE daily_logs SET value = ?, historical_target = ? WHERE id = ?',
+            (new_value, current_target, existing_log['id'])
         )
     else:
         new_value = amount
+        # Insert new log with the current target snapshot
         db.execute(
-            'INSERT INTO daily_logs (habit_id, date, value) VALUES (?, ?, ?)',
-            (habit_id, log_date_str, amount)
+            'INSERT INTO daily_logs (habit_id, date, value, historical_target) VALUES (?, ?, ?, ?)',
+            (habit_id, log_date_str, amount, current_target)
         )
 
     db.commit()
 
-    habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+    # 5. Calculate Return Data (Event logic, Stats)
     event_type = None
     if habit['type'] == 'vice':
         event_type = 'deflected'
-    elif new_value >= habit['target']:
+    elif new_value >= current_target: # Compare against the target we just used
         event_type = 'completed'
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -385,6 +406,34 @@ def habit_details(habit_id):
     }
 
     return render_template('habit_details.html', habit=habit, chart_data=json.dumps(chart_data))
+
+
+@app.route('/edit/<int:habit_id>', methods=('GET', 'POST'))
+def edit_habit(habit_id):
+    db = get_db()
+    habit = db.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        # Type is usually not editable as it breaks visualization logic, but color/target are.
+        
+        try:
+            target = float(request.form['target'])
+        except ValueError:
+            target = 1.0
+            
+        unit = request.form.get('unit', '')
+        color = request.form['color']
+
+        db.execute(
+            'UPDATE habits SET name = ?, target = ?, unit = ?, color = ? WHERE id = ?',
+            (name, target, unit, color, habit_id)
+        )
+        db.commit()
+        return redirect(url_for('habit_details', habit_id=habit_id))
+
+    return render_template('edit_habit.html', habit=habit)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
