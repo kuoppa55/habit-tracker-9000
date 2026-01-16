@@ -9,133 +9,161 @@
 </head>
 <body>
     <div class="container">
-        <h1>Hybrid Chain Tracker</h1>
-
-        <form action="{{ url_for('index')}}" method="GET" style="margin-bottom: 20px;">
-            <label for="date-picker">Viewing Date:</label>
-            <input type="date" id="date-picker" name="date" 
-               value="{{ current_view_date }}" 
-               onchange="this.form.submit()">
-        </form>
-
-        <a href="{{ url_for('add_habit') }}" class="btn" style="margin-bottom: 20px;">+ Add New Habit</a>
-
-        {% for habit in habits %}
-        <div class="habit-row" id="habit-{{ habit.id }}">
-            <div class="habit-info">
-                <h2>
-                    <a href="{{ url_for('habit_details', habit_id=habit.id) }}" class="habit-link">
-                        {{ habit.name }}
-                    </a>
-                </h2>
-                <p>Streak: <span id="streak-val-{{ habit.id }}">{{ habit.streak }}</span> days</p>
-
-                <div class="log-controls" id="controls-{{ habit.id }}">
-            
-                    {% if habit.type == 'binary' %}
-                        {% if habit.is_completed %}
-                            <button class="btn btn-disabled" disabled>Completed!</button>
-                        {% else %}
-                            <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="ajax-form" data-habit-id="{{ habit.id }}">
-                                <input type="hidden" name="date" value="{{ current_view_date }}">
-                                <input type="hidden" name="amount" value="{{ habit.target }}">
-                                <button type="submit" class="btn btn-checkin">Check In</button>
-                            </form>
-                        {% endif %}
-                    
-                    {% elif habit.type == 'progressive' %}
-                        <div class="prog-status">
-                            <small>{{ habit.today_value|int }} / {{ habit.target|int }} {{ habit.unit }}</small>
-                        </div>
-                        
-                        <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="prog-form ajax-form" id="form-{{ habit.id }}" data-habit-id="{{ habit.id }}">
-                            <input type="hidden" name="date" value="{{ current_view_date }}">
-                            <input type="number" id="input-{{ habit.id }}"name="amount" step="any" placeholder="+ Add" required>
-                            <button type="submit" class="btn btn-small">+</button>
-                        </form>
-
-                        <div class="timer-controls" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
-                            <span id="timer-display-{{ habit.id }}" style="font-family: monospace; font-size: 1.1rem; min-width: 50px;">00:00</span>
-                            <button type="button" class="btn btn-small" style="background:#2196F3;" onclick="toggleTimer({{ habit.id }})">▶</button>
-                            <button type="button" class="btn btn-small" style="background:#4CAF50;" onclick="saveTimer({{ habit.id }})">💾</button>
-                        </div>
-
-                    {% elif habit.type == 'vice'%}
-                        {% if habit.is_completed %}
-                            <button class="btn btn-vice-disabled" disabled>Shield Active</button>
-                        {% else %}
-                            <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="ajax-form" data-habit-id="{{ habit.id }}">
-                                <input type="hidden" name="date" value="{{ current_view_date }}">
-                                <input type="hidden" name="amount" value="1">
-                                <button type="submit" class="btn btn-vice">Deflect Vice</button>
-                            </form>
-                        {% endif %}
-                    {% endif %}
-            
+        <div class="win98-window">
+            <div class="win98-titlebar">
+                <span class="win98-titlebar-text">Habit Tracker 9000</span>
+                <div class="win98-titlebar-buttons">
+                    <button class="win98-titlebar-btn" type="button">_</button>
+                    <button class="win98-titlebar-btn" type="button">[]</button>
+                    <button class="win98-titlebar-btn" type="button">X</button>
                 </div>
             </div>
+            <div class="win98-window-content">
+                <div class="header-area">
+                    <form action="{{ url_for('index')}}" method="GET" class="date-picker-form">
+                        <label for="date-picker">Viewing Date:</label>
+                        <input type="date" id="date-picker" name="date"
+                           value="{{ current_view_date }}"
+                           onchange="this.form.submit()">
+                    </form>
+                    <a href="{{ url_for('add_habit') }}" class="btn">+ Add New Habit</a>
+                </div>
 
-            <div class="chain-container">
-
-                {% if habit.type == 'vice' %}
-                    <div class="vice-container">
-                        <div class="shield {{ habit.shield_material }} {{ 'active' if habit.is_completed else '' }}">
-                            <svg width="80" height="90" viewBox="0 0 100 120">
-                                <path class="shield-shape" d="M50 115 C20 100 0 70 0 30 L50 0 L100 30 C100 70 80 100 50 115 Z" />
-                                <path class="shield-glint" d="M50 10 C80 30 90 60 50 105 C10 60 20 30 50 10 Z" fill="rgba(255,255,255,0.2)"/>
-                            </svg>
-                            <span class="shield-streak">{{ habit.streak }}</span>
+                {% for habit in habits %}
+                <div class="habit-row" id="habit-{{ habit.id }}">
+                    <div class="habit-row-titlebar">
+                        <span class="win98-titlebar-text">{{ habit.name }}</span>
+                        <div class="win98-titlebar-buttons">
+                            <button class="win98-titlebar-btn" type="button">_</button>
+                            <button class="win98-titlebar-btn" type="button">[]</button>
+                            <button class="win98-titlebar-btn" type="button">X</button>
                         </div>
-                        <div class="deflection-zone"></div>
                     </div>
-                {% else %}
-                    {% for day in habit.history %}
+                    <div class="habit-row-content">
+                        <div class="habit-info">
+                            <h2>
+                                <a href="{{ url_for('habit_details', habit_id=habit.id) }}" class="habit-link">
+                                    {{ habit.name }}
+                                </a>
+                            </h2>
+                            <p>Streak: <span id="streak-val-{{ habit.id }}">{{ habit.streak }}</span> days</p>
 
-                        {% if not loop.first %}
-                            {% set prev_day = habit.history[loop.index0 - 1] %}
-                            <div class="link-connector
-                                {{ 'active' if (day.completed and prev_day.completed) else '' }}
-                                {{'animate' if (day.is_today and day.completed and prev_day.completed) else '' }}
-                                "
-                                style="{% if day.completed and prev_day.completed %}background-color: {{ habit.color }};{% endif %}"
-                            ></div>
-                        {% endif %}
+                            <div class="log-controls" id="controls-{{ habit.id }}">
 
-                        <div class="node-wrapper">
-                            {% if habit.type == 'binary' %}
-                                <div class="node binary-node {{ 'completed' if day.completed else '' }} {{ 'today' if day.is_today else '' }}">
-                                    {% if day.is_today %}
-                                        <span class="streak-num">{{ habit.streak }}</span>
+                                {% if habit.type == 'binary' %}
+                                    {% if habit.is_completed %}
+                                        <button class="btn btn-disabled" disabled>Completed!</button>
                                     {% else %}
-                                        {% if day.completed %}✓{% endif %}
+                                        <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="ajax-form" data-habit-id="{{ habit.id }}">
+                                            <input type="hidden" name="date" value="{{ current_view_date }}">
+                                            <input type="hidden" name="amount" value="{{ habit.target }}">
+                                            <button type="submit" class="btn btn-checkin">Check In</button>
+                                        </form>
                                     {% endif %}
-                                </div>
-                            {% elif habit.type == 'progressive' %}
-                                <div class="node progressive-node {{ 'today' if day.is_today else '' }}">
-                                    <svg width="50" height="50" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="45" stroke="#eee" stroke-width="10" fill="none"/>
-                                        <circle class="fill-circle" cx="50" cy="50" r="40" 
-                                            fill="{{ habit.color }}" 
-                                            fill-opacity="0.3" 
-                                            style="opacity: {{ '1' if day.fill_percent >= 100 else '0' }}; transition: opacity 0.3s ease;" />
-                                        <circle cx="50" cy="50" r="45" stroke="{{ habit.color }}" stroke-width="10" fill="none"
-                                            stroke-dasharray="283" 
-                                            stroke-dashoffset="{{ 283 - (283 * day.fill_percent / 100) }}"
-                                            transform="rotate(-90 50 50)" />
-                                    </svg>
-                                    {% if day.is_today %}
-                                        <span class="streak-num">{{ habit.streak }}</span>
-                                    {% elif day.fill_percent >= 100 %}
-                                        <span class="checkmark" style="color: #fff">✓</span>
+
+                                {% elif habit.type == 'progressive' %}
+                                    <div class="prog-status">
+                                        <small>{{ habit.today_value|int }} / {{ habit.target|int }} {{ habit.unit }}</small>
+                                    </div>
+
+                                    <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="prog-form ajax-form" id="form-{{ habit.id }}" data-habit-id="{{ habit.id }}">
+                                        <input type="hidden" name="date" value="{{ current_view_date }}">
+                                        <input type="number" id="input-{{ habit.id }}"name="amount" step="any" placeholder="+ Add" required>
+                                        <button type="submit" class="btn btn-small">+</button>
+                                    </form>
+
+                                    <div class="timer-controls" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                                        <span id="timer-display-{{ habit.id }}" style="font-family: monospace; font-size: 1.1rem; min-width: 50px;">00:00</span>
+                                        <button type="button" class="btn btn-small" onclick="toggleTimer({{ habit.id }})">▶</button>
+                                        <button type="button" class="btn btn-small" onclick="saveTimer({{ habit.id }})">Save</button>
+                                    </div>
+
+                                {% elif habit.type == 'vice'%}
+                                    {% if habit.is_completed %}
+                                        <button class="btn btn-vice-disabled" disabled>Shield Active</button>
+                                    {% else %}
+                                        <form action="{{ url_for('log_progress', habit_id=habit.id) }}" method="POST" class="ajax-form" data-habit-id="{{ habit.id }}">
+                                            <input type="hidden" name="date" value="{{ current_view_date }}">
+                                            <input type="hidden" name="amount" value="1">
+                                            <button type="submit" class="btn btn-vice">Deflect Vice</button>
+                                        </form>
                                     {% endif %}
-                                </div>
-                            {% endif %}
-                            <div class="day-label">{{ day.date }}</div>
+                                {% endif %}
+
+                            </div>
                         </div>
-                    {% endfor %}
-                {% endif %}
+
+                        <div class="chain-container">
+
+                            {% if habit.type == 'vice' %}
+                                <div class="vice-container">
+                                    <div class="shield {{ habit.shield_material }} {{ 'active' if habit.is_completed else '' }}">
+                                        <svg width="100" height="115" viewBox="0 0 100 120">
+                                            <path class="shield-shape" d="M50 115 C20 100 0 70 0 30 L50 0 L100 30 C100 70 80 100 50 115 Z" />
+                                            <path class="shield-glint" d="M50 10 C80 30 90 60 50 105 C10 60 20 30 50 10 Z" fill="rgba(255,255,255,0.2)"/>
+                                        </svg>
+                                        <span class="shield-streak">{{ habit.streak }}</span>
+                                    </div>
+                                    <div class="deflection-zone"></div>
+                                </div>
+                            {% else %}
+                                {% for day in habit.history %}
+
+                                    {% if not loop.first %}
+                                        {% set prev_day = habit.history[loop.index0 - 1] %}
+                                        <div class="link-connector
+                                            {{ 'active' if (day.completed and prev_day.completed) else '' }}
+                                            {{'animate' if (day.is_today and day.completed and prev_day.completed) else '' }}
+                                            "
+                                            style="{% if day.completed and prev_day.completed %}background-color: {{ habit.color }};{% endif %}"
+                                        ></div>
+                                    {% endif %}
+
+                                    <div class="node-wrapper">
+                                        {% if habit.type == 'binary' %}
+                                            <div class="node binary-node {{ 'completed' if day.completed else '' }} {{ 'today' if day.is_today else '' }}"
+                                                {% if day.completed %}style="background-color: {{ habit.color }};"{% endif %}>
+                                                {% if day.is_today %}
+                                                    <span class="streak-num">{{ habit.streak }}</span>
+                                                {% else %}
+                                                    {% if day.completed %}&#10003;{% endif %}
+                                                {% endif %}
+                                            </div>
+                                        {% elif habit.type == 'progressive' %}
+                                            <div class="node progressive-node {{ 'today' if day.is_today else '' }}">
+                                                <svg width="65" height="65" viewBox="0 0 100 100">
+                                                    <circle cx="50" cy="50" r="45" stroke="#C0C0C0" stroke-width="10" fill="none"/>
+                                                    <circle class="fill-circle" cx="50" cy="50" r="40"
+                                                        fill="{{ habit.color }}"
+                                                        fill-opacity="0.3"
+                                                        style="opacity: {{ '1' if day.fill_percent >= 100 else '0' }};" />
+                                                    <circle cx="50" cy="50" r="45" stroke="{{ habit.color }}" stroke-width="10" fill="none"
+                                                        stroke-dasharray="283"
+                                                        stroke-dashoffset="{{ 283 - (283 * day.fill_percent / 100) }}"
+                                                        transform="rotate(-90 50 50)" />
+                                                </svg>
+                                                {% if day.is_today %}
+                                                    <span class="streak-num">{{ habit.streak }}</span>
+                                                {% elif day.fill_percent >= 100 %}
+                                                    <span class="checkmark" style="color: #fff">&#10003;</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="day-label">{{ day.date }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </div> {% endfor %}
+            <div class="win98-statusbar">
+                <div class="win98-statusbar-section win98-statusbar-main">Ready</div>
+                <div class="win98-statusbar-section">{{ habits|length }} habit{{ 's' if habits|length != 1 else '' }}</div>
+                <div class="win98-statusbar-section">{{ current_view_date }}</div>
+            </div>
+        </div>
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

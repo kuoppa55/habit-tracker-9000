@@ -1,5 +1,18 @@
 let myChart = null;
 
+// Win98 Chart Theme
+const win98Theme = {
+    backgroundColor: '#FFFFFF',
+    gridColor: '#C0C0C0',
+    textColor: '#000000',
+    tooltipBg: '#FFFFE1',
+    tooltipBorder: '#000000',
+    font: {
+        family: 'Tahoma, sans-serif',
+        size: 13
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize with Week view
     switchView('week');
@@ -8,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function switchView(view) {
     const ctx = document.getElementById('progressChart');
     if (!ctx) return;
-    
+
     const context = window.habitContext;
     const viewData = context.data[view];
     const habitType = context.type;
@@ -27,7 +40,7 @@ function switchView(view) {
     const star = document.getElementById('medal-star');
     const text = document.getElementById('medal-text');
     const container = document.getElementById('medal-container');
-    
+
     const completed = viewData.completed;
     const possible = viewData.possible;
 
@@ -41,22 +54,22 @@ function switchView(view) {
     if (percent === 1 && possible > 0) {
         // Unlock the Star
         star.style.opacity = '1';
-        star.style.filter = 'drop-shadow(0 0 2px ' + color + ')';
+        star.style.filter = 'none';
 
         text.style.opacity = '0'; // Hide percentage
-        
-        // Glow the Container
+
+        // Simple scale, no glow for Win98
         container.style.transform = 'scale(1.1)';
-        container.style.filter = 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.4))';
+        container.style.filter = 'none';
 
     } else {
         // Locked State (Show progress only)
-        star.style.opacity = '0'; // Dim the star
+        star.style.opacity = '0';
         star.style.filter = 'none';
 
-        text.style.opacity = '1'; // Show percentage
+        text.style.opacity = '1';
         text.textContent = Math.round(percent * 100) + "%";
-        
+
         container.style.transform = 'scale(1)';
         container.style.filter = 'none';
     }
@@ -67,8 +80,8 @@ function switchView(view) {
 
     if (habitType === 'progressive' && view === 'month') {
         chartType = 'line';
-        fillSetting = { target: 'origin', above: color + '33' }; // Add transparency
-        tensionSetting = 0.3; // Smooth curves
+        fillSetting = { target: 'origin', above: color + '33' };
+        tensionSetting = 0; // No smooth curves for Win98
     }
 
     if (myChart) {
@@ -83,35 +96,71 @@ function switchView(view) {
                 label: habitType === 'binary' ? 'Completed' : 'Value',
                 data: viewData.values,
                 backgroundColor: color,
-                borderColor: color,
-                borderWidth: chartType === 'line' ? 2 : 0,
-                borderRadius: 4, // Nice rounded corners on bars
+                borderColor: '#000000',
+                borderWidth: 1,
+                borderRadius: 0, // Square corners for Win98
                 fill: fillSetting,
-                tension: tensionSetting
+                tension: tensionSetting,
+                pointRadius: chartType === 'line' ? 3 : 0,
+                pointBackgroundColor: color,
+                pointBorderColor: '#000000',
+                pointBorderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 0 // No animations for Win98
+            },
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { display: false }, // Cleaner look
-                    // For binary week/month, max is 1. For others, let it float.
-                    suggestedMax: (habitType !== 'progressive' && view !== 'year') ? 1.2 : undefined,
+                    grid: {
+                        display: true,
+                        color: win98Theme.gridColor,
+                        lineWidth: 1
+                    },
+                    border: {
+                        color: '#000000',
+                        width: 1
+                    },
                     ticks: {
-                        // Hide decimals for binary charts
+                        font: win98Theme.font,
+                        color: win98Theme.textColor,
                         stepSize: (habitType !== 'progressive' && view !== 'year') ? 1 : undefined
-                    }
+                    },
+                    suggestedMax: (habitType !== 'progressive' && view !== 'year') ? 1.2 : undefined
                 },
                 x: {
-                    grid: { display: false }
+                    grid: {
+                        display: true,
+                        color: win98Theme.gridColor,
+                        lineWidth: 1
+                    },
+                    border: {
+                        color: '#000000',
+                        width: 1
+                    },
+                    ticks: {
+                        font: win98Theme.font,
+                        color: win98Theme.textColor
+                    }
                 }
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#333',
+                    backgroundColor: win98Theme.tooltipBg,
+                    titleColor: win98Theme.textColor,
+                    bodyColor: win98Theme.textColor,
+                    borderColor: win98Theme.tooltipBorder,
+                    borderWidth: 1,
+                    titleFont: win98Theme.font,
+                    bodyFont: win98Theme.font,
+                    cornerRadius: 0, // Square corners
+                    padding: 6,
+                    displayColors: false,
                     callbacks: {
                         label: function(context) {
                             return context.raw + (habitType === 'progressive' ? ' ' + window.habitContext.unit : '');

@@ -9,62 +9,77 @@
 </head>
 <body>
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1>{{ habit.name }}</h1>
-            <div>
-                <a href="{{ url_for('edit_habit', habit_id=habit.id) }}" class="btn" style="background-color: #777; margin-right: 10px;">Edit</a>
-                <a href="{{ url_for('index') }}" class="btn">← Back</a>
-            </div>
-        </div>
-
-        <div class="stats-card" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <div class="chart-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                <button class="tab-btn active" onclick="switchView('week')">This Week</button>
-                <button class="tab-btn" onclick="switchView('month')">This Month</button>
-                <button class="tab-btn" onclick="switchView('year')">This Year</button>
-            </div>
-
-            <div class="stats-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                
-                <div class="scoreboard">
-                    <h2 id="total-display" style="margin: 0; font-size: 2.5rem; color: {{ habit.color }}">0</h2>
-                    <span id="unit-display" style="color: #666; font-weight: bold;">
-                        {% if habit.type == 'progressive' %}
-                            {{ habit.unit }}
-                        {% else %}
-                            Days Completed
-                        {% endif %}
-                    </span>
-                </div>
-
-                <div id="medal-container" class="medal-wrapper" style="position: relative; width: 64px; height: 64px; transition: all 0.5s ease;">
-                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="32" cy="32" r="28" stroke="#eee" stroke-width="5" fill="none" />
-                        
-                        <circle id="medal-ring" cx="32" cy="32" r="28" stroke="{{ habit.color }}" stroke-width="5" fill="none" 
-                                stroke-dasharray="176" 
-                                stroke-dashoffset="176" 
-                                stroke-linecap="round"
-                                transform="rotate(-90 32 32)"
-                                style="transition: stroke-dashoffset 0.6s ease-out;" />
-                        
-                        <path id="medal-star" d="M32 10 L38 28 H58 L42 40 L48 58 L32 48 L16 58 L22 40 L6 28 H26 Z" 
-                              fill="{{ habit.color }}" 
-                              transform="translate(0, -2)" 
-                              style="transition: opacity 0.3s; opacity: 0;" />
-                        
-                        <text id="medal-text" x="32" y="38" text-anchor="middle" 
-                              style="font-family: sans-serif; font-weight: bold; font-size: 14px; fill: #999; transition: opacity 0.3s;">
-                            0%
-                        </text>
-                    </svg>
+        <div class="win98-window">
+            <div class="win98-titlebar">
+                <span class="win98-titlebar-text">{{ habit.name }} - Statistics</span>
+                <div class="win98-titlebar-buttons">
+                    <button class="win98-titlebar-btn" type="button">_</button>
+                    <button class="win98-titlebar-btn" type="button">[]</button>
+                    <button class="win98-titlebar-btn" type="button">X</button>
                 </div>
             </div>
+            <div class="win98-window-content">
+                <div class="header-area" style="margin-bottom: 15px;">
+                    <h1 style="margin: 0;">{{ habit.name }}</h1>
+                    <div>
+                        <a href="{{ url_for('edit_habit', habit_id=habit.id) }}" class="btn">Edit</a>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back</a>
+                    </div>
+                </div>
 
-            <div style="height: 300px; position: relative;">
-                <canvas id="progressChart"></canvas>
+                <div class="stats-card">
+                    <div class="chart-tabs">
+                        <button class="tab-btn active" onclick="switchView('week')">This Week</button>
+                        <button class="tab-btn" onclick="switchView('month')">This Month</button>
+                        <button class="tab-btn" onclick="switchView('year')">This Year</button>
+                    </div>
+
+                    <div class="stats-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px;">
+
+                        <div class="scoreboard">
+                            <h2 id="total-display" style="margin: 0; font-size: 30px; color: {{ habit.color }}">0</h2>
+                            <span id="unit-display" style="color: #000; font-weight: bold; font-size: 14px;">
+                                {% if habit.type == 'progressive' %}
+                                    {{ habit.unit }}
+                                {% else %}
+                                    Days Completed
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div id="medal-container" class="medal-wrapper" style="position: relative; width: 80px; height: 80px;">
+                            <svg width="80" height="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="28" stroke="#C0C0C0" stroke-width="5" fill="none" />
+
+                                <circle id="medal-ring" cx="32" cy="32" r="28" stroke="{{ habit.color }}" stroke-width="5" fill="none"
+                                        stroke-dasharray="176"
+                                        stroke-dashoffset="176"
+                                        stroke-linecap="butt"
+                                        transform="rotate(-90 32 32)" />
+
+                                <path id="medal-star" d="M32 10 L38 28 H58 L42 40 L48 58 L32 48 L16 58 L22 40 L6 28 H26 Z"
+                                      fill="{{ habit.color }}"
+                                      transform="translate(0, -2)"
+                                      style="opacity: 0;" />
+
+                                <text id="medal-text" x="32" y="38" text-anchor="middle"
+                                      style="font-family: Tahoma, sans-serif; font-weight: bold; font-size: 14px; fill: #808080;">
+                                    0%
+                                </text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" style="height: 300px; position: relative; background: #fff; margin: 10px; box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #fff, inset 2px 2px 0 #808080;">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+
+                </div>
             </div>
-
+            <div class="win98-statusbar">
+                <div class="win98-statusbar-section win98-statusbar-main">Viewing statistics for {{ habit.name }}</div>
+                <div class="win98-statusbar-section">Type: {{ habit.type|title }}</div>
+            </div>
         </div>
     </div>
 
@@ -79,21 +94,5 @@
     </script>
 
     <script src="{{ url_for('static', filename='js/habit_details.js') }}"></script>
-
-    <style>
-        .tab-btn {
-            background: none;
-            border: none;
-            font-size: 1rem;
-            padding: 5px 10px;
-            cursor: pointer;
-            color: #999;
-            font-weight: bold;
-        }
-        .tab-btn.active {
-            color: #333;
-            border-bottom: 3px solid {{ habit.color }};
-        }
-    </style>
 </body>
 </html>

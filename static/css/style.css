@@ -1,23 +1,288 @@
-body {font-family: sans-serif; background: #f4f4f4;}
-.container {max-width: 800px; margin: 0 auto; padding: 20px;}
+/* ============================================
+   Windows 98 UI Theme for Habit Tracker 9000
+   ============================================ */
 
-.habit-row {
-    background: white;
-    padding: 20px;
+/* --- CSS Custom Properties (Win98 Color System) --- */
+:root {
+    --win98-face: #C0C0C0;
+    --win98-highlight: #FFFFFF;
+    --win98-light: #DFDFDF;
+    --win98-shadow: #808080;
+    --win98-dark-shadow: #404040;
+    --win98-window-bg: #C0C0C0;
+    --win98-title-active: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    --win98-title-inactive: linear-gradient(90deg, #808080 0%, #C0C0C0 100%);
+    --win98-desktop: #008080;
+    --win98-tooltip: #FFFFE1;
+    --win98-text: #000000;
+    --win98-text-disabled: #808080;
+    --win98-input-bg: #FFFFFF;
+}
+
+/* --- Global Reset & Base --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    background: var(--win98-desktop);
+    margin: 0;
+    padding: 25px;
+    min-height: 100vh;
+    color: var(--win98-text);
+}
+
+/* --- Window Frame --- */
+.win98-window {
+    background: var(--win98-face);
+    border: none;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        inset -2px -2px 0 var(--win98-shadow),
+        inset 2px 2px 0 var(--win98-light);
+    padding: 3px;
     margin-bottom: 15px;
-    border-radius: 10px;
+}
+
+.win98-titlebar {
+    background: var(--win98-title-active);
+    padding: 4px 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 3px;
+    min-height: 28px;
 }
 
+.win98-titlebar-text {
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    padding-left: 4px;
+}
+
+.win98-titlebar-buttons {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.win98-titlebar-btn {
+    width: 21px;
+    height: 18px;
+    background: var(--win98-face);
+    border: none;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight);
+    font-size: 12px;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+    padding: 0;
+    padding-bottom: 2px;
+    line-height: 1;
+}
+
+.win98-titlebar-btn:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight);
+}
+
+.win98-window-content {
+    padding: 15px;
+}
+
+/* --- Container --- */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* --- Beveled Buttons --- */
+.btn {
+    display: inline-block;
+    background: var(--win98-face);
+    color: var(--win98-text);
+    padding: 6px 20px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: Tahoma, sans-serif;
+    min-height: 30px;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        inset -2px -2px 0 var(--win98-shadow),
+        inset 2px 2px 0 var(--win98-light);
+}
+
+.btn:hover {
+    background: var(--win98-face);
+}
+
+.btn:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
+    padding: 7px 19px 5px 21px;
+}
+
+.btn-secondary {
+    background: var(--win98-face);
+    color: var(--win98-text);
+    margin-left: 5px;
+}
+
+.btn-disabled, .btn:disabled {
+    background: var(--win98-face);
+    color: var(--win98-text-disabled);
+    text-shadow: 1px 1px 0 var(--win98-highlight);
+    cursor: default;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-shadow),
+        inset 1px 1px 0 var(--win98-highlight);
+}
+
+.btn-checkin {
+    background: var(--win98-face);
+    font-size: 14px;
+    padding: 6px 16px;
+}
+
+.btn-small {
+    padding: 4px 12px;
+    font-size: 14px;
+    min-height: 26px;
+    background: var(--win98-face);
+}
+
+.btn-vice {
+    background: var(--win98-face);
+}
+
+.btn-vice-disabled {
+    background: var(--win98-face);
+    color: var(--win98-text-disabled);
+    text-shadow: 1px 1px 0 var(--win98-highlight);
+}
+
+/* --- Habit Row (Window Frame) --- */
+.habit-row {
+    background: var(--win98-face);
+    padding: 3px;
+    margin-bottom: 10px;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        inset -2px -2px 0 var(--win98-shadow),
+        inset 2px 2px 0 var(--win98-light);
+}
+
+.habit-row-titlebar {
+    background: var(--win98-title-active);
+    padding: 4px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 28px;
+}
+
+.habit-row-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --- Form Elements --- */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0;
+    background: var(--win98-input-bg);
+    font-family: Tahoma, sans-serif;
+    font-size: 14px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
+}
+
+select {
+    padding: 6px 8px;
+    border: none;
+    border-radius: 0;
+    background: var(--win98-input-bg);
+    font-family: Tahoma, sans-serif;
+    font-size: 14px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
+    cursor: pointer;
+}
+
+input[type="color"] {
+    height: 38px;
+    width: 60px;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    background: var(--win98-face);
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
+}
+
+/* --- Chain Container --- */
 .chain-container {
     display: flex;
-    /* Align items to the top so we can calculate the exact center of the node */
     align-items: flex-start;
+    background: var(--win98-input-bg);
+    padding: 15px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
 }
 
+/* --- Node Wrapper --- */
 .node-wrapper {
     display: flex;
     flex-direction: column;
@@ -26,206 +291,133 @@ body {font-family: sans-serif; background: #f4f4f4;}
     z-index: 2;
 }
 
+/* --- Nodes (Beveled Circles) --- */
 .node {
-    width: 50px;
-    height: 50px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     margin: 0;
-    
-    /* This creates the perfect center for text/checkmarks */
-    display: flex; 
+    display: flex;
     justify-content: center;
     align-items: center;
-    
-    font-size: 1rem;
+    font-size: 14px;
     font-weight: bold;
-    border: 2px solid transparent;
+    border: none;
+    box-shadow:
+        inset -2px -2px 0 var(--win98-dark-shadow),
+        inset 2px 2px 0 var(--win98-highlight),
+        inset -1px -1px 0 var(--win98-shadow);
 }
 
 .node.today {
-    border-color: #333; /* Highlight Today */
-    transform: scale(1.1);
+    /* No outline - just slightly larger */
+    transform: scale(1.05);
 }
 
 .day-label {
-    font-size: 0.7rem;
-    color: #999;
+    font-size: 11px;
+    color: var(--win98-text);
     margin-top: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
+/* --- Binary Node --- */
 .binary-node {
-    background: #e0e0e0;
-    color: #888;
-    transition: background 0.3s;
+    background: var(--win98-light);
+    color: var(--win98-text-disabled);
 }
 
 .binary-node.completed {
     background: #4caf50;
     color: white;
+    box-shadow:
+        inset 2px 2px 0 rgba(255,255,255,0.3),
+        inset -2px -2px 0 rgba(0,0,0,0.2);
 }
 
+/* --- Progressive Node --- */
 .progressive-node {
-    background: transparent; 
-    position: relative; /* Essential for centering the text over the ring */
-    width: 50px;
-    height: 50px;
+    background: transparent;
+    position: relative;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
+    box-shadow: none;
 }
+
 .progressive-node svg {
     position: absolute;
     top: 0;
     left: 0;
-    width: 50px;
-    height: 50px;
-    z-index: 0; /* Sit behind */
+    width: 65px;
+    height: 65px;
+    z-index: 0;
+    shape-rendering: crispEdges;
 }
+
+.progressive-node svg circle {
+    stroke-linecap: butt;
+}
+
 .progressive-node .streak-num {
     position: relative;
-    z-index: 10; /* Sit on top */
-    line-height: 1; /* Fix vertical alignment issues */
+    z-index: 10;
+    line-height: 1;
+    font-size: 15px;
 }
 
 .progressive-node .checkmark {
     position: relative;
-    z-index: 10; /* Sit on top of the SVG */
+    z-index: 10;
     font-weight: bold;
 }
 
+/* --- Link Connectors (Chunky Beveled Bars) --- */
 .link-connector {
-    width: 30px; 
-    height: 6px;
-    background: #e0e0e0;
-    margin: 0 -2px; 
+    width: 38px;
+    height: 10px;
+    background: var(--win98-light);
+    margin: 0 -3px;
     z-index: 1;
-    transform-origin: left;
-    
-    /* MAGIC NUMBER: 22px 
-       Node Height (50px) / 2 = 25px
-       Connector Height (6px) / 2 = 3px
-       25px - 3px = 22px (Push down from top to hit center)
-    */
-    margin-top: 22px;
+    margin-top: 28px;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight);
 }
 
 .link-connector.active {
     background: #4caf50;
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,0.3),
+        inset -1px -1px 0 rgba(0,0,0,0.2);
 }
 
+/* Instant appear instead of smooth animation */
 .link-connector.animate {
-    animation: drawLink 0.6s ease-out forwards;
+    animation: none;
 }
 
-@keyframes drawLink {
-    0% { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input[type="text"],
-input[type="number"] {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-input[type="color"] {
-    height: 40px;
-    width: 60px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn {
-    display: inline-block;
-    background: #333;
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.btn:hover {
-    background: #555;
-}
-
-.btn-secondary {
-    background: #ccc;
-    color: #333;
-    margin-left: 10px;
-}
-
-.log-controls {
-    margin-top: 10px;
-}
-
-.btn-checkin {
-    background-color: #2196f3;
-    font-size: 0.9rem;
-    padding: 8px 16px;
-}
-
-.btn-disabled {
-    background-color: #4CAF50; /* Green for done */
-    opacity: 0.7;
-    cursor: default;
-}
-
-/* Progressive Form Styling */
-.prog-form {
-    display: flex;
-    gap: 5px;
-    margin-top: 5px;
-}
-
-.prog-form input {
-    width: 80px;
-    padding: 5px;
-    font-size: 0.9rem;
-}
-
-.btn-small {
-    padding: 5px 12px;
-    font-size: 1.2rem;
-    line-height: 1rem;
-    background: #333;
-}
-
-.prog-status {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 3px;
-}
-
+/* --- Vice Shield Container --- */
 .vice-container {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 80px;
-    height: 90px;
+    width: 100px;
+    height: 115px;
 }
 
+/* --- Shield (16-bit Style) --- */
 .shield {
     position: relative;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .shield svg {
-    filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3));
+    filter: none;
+    shape-rendering: crispEdges;
+    width: 100px;
+    height: 115px;
 }
 
 .shield-streak {
@@ -233,138 +425,347 @@ input[type="color"] {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.5rem;
+    font-size: 20px;
     font-weight: bold;
     color: white;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 0 #000;
     pointer-events: none;
 }
 
-/* --- Materials --- */
+/* --- Shield Materials (16-bit) --- */
 
-/* Wood (Start) */
+/* Wood (0-13 days) */
 .shield.wood .shield-shape {
-    fill: #8D6E63; /* Brown */
-    stroke: #5D4037;
+    fill: #8B4513;
+    stroke: #5D3A1A;
     stroke-width: 3;
 }
-
-/* Iron (3+ Days) */
-.shield.iron .shield-shape {
-    fill: #78909C; /* Blue Grey */
-    stroke: #37474F;
-    stroke-width: 4;
+.shield.wood .shield-glint {
+    fill: rgba(255,255,255,0.1);
 }
 
-/* Gold (7+ Days) */
-.shield.gold .shield-shape {
-    fill: #FFD700; /* Gold */
-    stroke: #FF6F00;
+/* Iron (14-29 days) */
+.shield.iron .shield-shape {
+    fill: #808080;
+    stroke: #404040;
     stroke-width: 4;
+}
+.shield.iron .shield-glint {
+    fill: rgba(255,255,255,0.15);
+}
+
+/* Gold (30-59 days) */
+.shield.gold .shield-shape {
+    fill: #FFD700;
+    stroke: #B8860B;
+    stroke-width: 4;
+}
+.shield.gold .shield-glint {
+    fill: rgba(255,255,255,0.2);
 }
 .shield.gold {
-    filter: drop-shadow(0 0 10px #FFD700);
+    filter: none;
 }
 
-/* Energy (30+ Days) */
+/* Energy (60+ days) */
 .shield.energy .shield-shape {
-    fill: #2979FF; /* Neon Blue */
-    stroke: #fff;
+    fill: #0080FF;
+    stroke: #FFFFFF;
     stroke-width: 2;
 }
+.shield.energy .shield-glint {
+    fill: rgba(255,255,255,0.25);
+}
 .shield.energy {
-    filter: drop-shadow(0 0 15px #2979FF);
-    animation: pulse 2s infinite;
+    filter: none;
+    animation: pulse-stepped 1s infinite steps(4);
 }
 
-/* --- Active State (Today Checked In) --- */
+@keyframes pulse-stepped {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* --- Active State --- */
 .shield.active {
-    transform: scale(1.1); /* Slightly larger to show active protection */
+    transform: scale(1.05);
 }
 
-@keyframes pulse {
-    0% { filter: drop-shadow(0 0 10px #2979FF); }
-    50% { filter: drop-shadow(0 0 25px #2979FF); }
-    100% { filter: drop-shadow(0 0 10px #2979FF); }
-}
-
-/* Vice Buttons */
-.btn-vice {
-    background-color: #f44336; /* Red to signify 'fighting' a vice */
-}
-.btn-vice-disabled {
-    background-color: #8D6E63; /* Wood color */
-    color: #eee;
-}
-
+/* --- Deflection Animation (Stepped) --- */
 @keyframes deflection {
     0% { transform: scale(1); }
-    40% { transform: scale(0.9) rotate(-5deg); } /* Impact */
-    60% { transform: scale(1.1) rotate(5deg); box-shadow: 0 0 20px rgba(255,255,255,0.8); } /* Deflect */
+    33% { transform: scale(0.95) rotate(-3deg); }
+    66% { transform: scale(1.05) rotate(3deg); }
     100% { transform: scale(1) rotate(0); }
 }
 
 .shield.deflecting {
-    animation: deflection 0.4s ease-out;
+    animation: deflection 0.3s steps(3);
 }
 
+/* --- Habit Link --- */
 .habit-link {
     text-decoration: none;
-    color: inherit; /* Inherits the black h2 color */
-    transition: color 0.2s;
+    color: var(--win98-text);
 }
 
 .habit-link:hover {
-    color: #2196F3; /* Light blue on hover to indicate clickability */
     text-decoration: underline;
 }
 
-/* --- Responsive styling for smaller screens --- */
+/* --- Habit Info Section --- */
+.habit-info {
+    flex: 1;
+    text-align: right;
+}
+
+.habit-info h2 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.habit-info p {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+/* --- Log Controls (align right for desktop) --- */
+.log-controls {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.prog-form {
+    justify-content: flex-end;
+}
+
+.timer-controls {
+    justify-content: flex-end;
+}
+
+/* --- Progressive Form --- */
+.prog-form {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.prog-form input {
+    width: 80px;
+    padding: 4px 6px;
+    font-size: 14px;
+}
+
+.prog-status {
+    font-size: 14px;
+    color: var(--win98-text);
+    margin-bottom: 5px;
+}
+
+/* --- Timer Controls --- */
+.timer-controls {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.timer-controls span {
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    background: var(--win98-input-bg);
+    padding: 4px 8px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight);
+}
+
+/* --- Status Bar --- */
+.win98-statusbar {
+    display: flex;
+    background: var(--win98-face);
+    padding: 3px;
+    margin-top: 4px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-shadow),
+        inset -1px -1px 0 var(--win98-highlight);
+}
+
+.win98-statusbar-section {
+    padding: 4px 10px;
+    font-size: 13px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-shadow),
+        inset -1px -1px 0 var(--win98-highlight);
+}
+
+.win98-statusbar-main {
+    flex: 1;
+}
+
+/* --- Stats Card (Win98 Window Style) --- */
+.stats-card {
+    background: var(--win98-face) !important;
+    padding: 3px !important;
+    border-radius: 0 !important;
+    margin-bottom: 15px !important;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        inset -2px -2px 0 var(--win98-shadow),
+        inset 2px 2px 0 var(--win98-light) !important;
+}
+
+.stats-card .stats-header {
+    padding: 10px;
+}
+
+/* --- Chart Tabs (Win98 Style) --- */
+.chart-tabs {
+    display: flex;
+    gap: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    padding: 10px 10px 0 10px !important;
+}
+
+.tab-btn {
+    background: var(--win98-face) !important;
+    border: none !important;
+    font-size: 14px !important;
+    padding: 6px 16px !important;
+    cursor: pointer;
+    color: var(--win98-text) !important;
+    font-weight: normal !important;
+    font-family: Tahoma, sans-serif;
+    box-shadow:
+        inset -1px -1px 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        -1px 0 0 var(--win98-face);
+    position: relative;
+    margin-bottom: -1px;
+}
+
+.tab-btn.active {
+    background: var(--win98-input-bg) !important;
+    color: var(--win98-text) !important;
+    border-bottom: none !important;
+    z-index: 1;
+    box-shadow:
+        inset -1px 0 0 var(--win98-dark-shadow),
+        inset 1px 1px 0 var(--win98-highlight),
+        0 1px 0 var(--win98-input-bg);
+}
+
+/* --- Chart Container --- */
+.chart-container {
+    background: var(--win98-input-bg);
+    padding: 10px;
+    margin: 0 10px 10px 10px;
+    box-shadow:
+        inset 1px 1px 0 var(--win98-dark-shadow),
+        inset -1px -1px 0 var(--win98-highlight),
+        inset 2px 2px 0 var(--win98-shadow);
+}
+
+/* --- Scoreboard --- */
+.scoreboard h2 {
+    margin: 0;
+    font-size: 30px !important;
+}
+
+.scoreboard span {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* --- Medal Wrapper --- */
+.medal-wrapper {
+    transition: none !important;
+}
+
+.medal-wrapper svg {
+    shape-rendering: crispEdges;
+}
+
+/* --- Page Title --- */
+h1 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 12px 0;
+}
+
+/* --- Main Window H1 --- */
+.win98-window h1 {
+    font-size: 18px;
+    margin: 0 0 18px 0;
+}
+
+/* --- Form Page Styling --- */
+.form-page-content {
+    padding: 15px;
+}
+
+/* --- Responsive Styling --- */
 @media (max-width: 768px) {
-    .habit-row {
+    body {
+        padding: 10px;
+    }
+
+    .habit-row-content {
         flex-direction: column;
         align-items: stretch;
-        padding: 15px;
-        overflow: hidden;
+        padding: 10px;
+    }
+
+    .habit-info {
+        order: 0;
+    }
+
+    .chain-container {
+        order: 1;
     }
 
     .habit-info {
         width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         text-align: center;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 15px;
+        border-bottom: 1px solid var(--win98-shadow);
+        padding-bottom: 10px;
     }
 
-    .log-controls {
-        display: flex;
-        flex-direction: column;
+    .habit-info .log-controls {
         align-items: center;
-        gap: 10px;
     }
 
-    .prog-form {
+    .habit-info .prog-form {
+        justify-content: center;
+    }
+
+    .habit-info .timer-controls {
         justify-content: center;
     }
 
     .chain-container {
         width: 100%;
-        overflow-x: auto; /* Enable horizontal scroll */
-        padding: 15px 10px;
-        justify-content: center;
-        -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        overflow-x: auto;
+        padding: 10px;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
         display: flex;
         flex-wrap: nowrap;
     }
 
     .node-wrapper {
-        min-width: 60px; 
+        min-width: 65px;
         flex-shrink: 0;
-        padding: 0 2px;
     }
 
     .container {
-        padding: 10px;
+        padding: 0;
         width: 100%;
     }
 
@@ -375,11 +776,66 @@ input[type="color"] {
     }
 
     .link-connector {
-        margin-top: 22px;
+        margin: 28px -3px 0 -3px;
         flex-shrink: 0;
+        align-self: flex-start;
     }
 
     .node {
-        margin: 5px 0;
+        margin-top: 0;
     }
+
+    /* Larger touch targets */
+    .btn {
+        min-height: 38px;
+        padding: 8px 20px;
+    }
+
+    .win98-statusbar {
+        flex-wrap: wrap;
+    }
+
+    .win98-statusbar-section {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .chart-tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* --- Header Area Styling --- */
+.header-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.header-area h1 {
+    margin: 0;
+}
+
+/* --- Date Picker Form --- */
+.date-picker-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-picker-form label {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.date-picker-form input[type="date"] {
+    width: auto;
 }
